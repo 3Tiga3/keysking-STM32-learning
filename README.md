@@ -35,6 +35,14 @@
 - **要点**：PB12/PB13 配为上拉输入（松开为高电平、按下接地为低电平）；PB14/PB15 为高电平点亮；消抖用 10ms 延时二次确认，松手检测用空 `while` 防止一次按压触发多次翻转
 - **Tag**：`hw03-key-led`
 
+### 第 4 份 · 非阻塞延时流水灯
+
+- **目标**：PB12、PB13、PB14 轮流点亮（500ms 间隔），但不用 `HAL_Delay` 阻塞
+- **实现方式**：`HAL_GetTick()` 读取 SysTick 毫秒计数，主循环比对 `当前 tick - 上次 tick >= interval` 才切换灯，切换后更新 `last_tick`
+- **涉及文件**：`Core/Src/main.c`、`Core/Src/gpio.c`、`keysking-STM32-learning.ioc`
+- **要点**：SysTick 在后台自动计时，主循环不空转——CPU 空闲时可响应其他任务，是裸机多任务调度的核心思想；对比写法用减法而非相等判断，天然规避 tick 溢出问题；这一版 PB12/13/14 恢复为推挽输出
+- **Tag**：`hw04-nonblock-flowing-led`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
@@ -42,12 +50,13 @@
 | 1 | GPIO 输出 · 板载 LED 闪烁 | `Core/Src/main.c` | 已完成 |
 | 2 | GPIO 输出 · 流水灯 | `Core/Src/main.c` | 已完成 |
 | 3 | GPIO 输入 · 按键控灯 | `Core/Src/main.c`、`gpio.c` | 已完成 |
-| 4 | 外部中断 EXTI | — | 待学 |
-| 5 | 定时器 / PWM | — | 待学 |
-| 6 | USART 串口 | — | 待学 |
-| 7 | DMA | — | 待学 |
-| 8 | ADC | — | 待学 |
-| 9 | I2C / SPI | — | 待学 |
+| 4 | 非阻塞延时 · SysTick 流水灯 | `Core/Src/main.c` | 已完成 |
+| 5 | 外部中断 EXTI | — | 待学 |
+| 6 | 定时器 / PWM | — | 待学 |
+| 7 | USART 串口 | — | 待学 |
+| 8 | DMA | — | 待学 |
+| 9 | ADC | — | 待学 |
+| 10 | I2C / SPI | — | 待学 |
 
 ## 日常更新工作流
 

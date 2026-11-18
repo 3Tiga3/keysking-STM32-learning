@@ -87,39 +87,28 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-
-
+  static const uint32_t interval = 500;   // 流水间隔 ms
+  uint32_t last_tick = 0;
+  uint8_t  led_index = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    // ================= 逻辑 1：PB12 控制 PB14 =================
-    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_SET)
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET); // 按下亮
-    }
-    else
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);   // 松开灭
+    if (HAL_GetTick() - last_tick >= interval) {
+      last_tick = HAL_GetTick();          // 用系统滴答计时，不占用 CPU
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, led_index == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, led_index == 1 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, led_index == 2 ? GPIO_PIN_RESET : GPIO_PIN_SET);
+      led_index = (led_index + 1) % 3;    // 状态轮转
     }
 
-    // ================= 逻辑 1：PB13 控制 PB15 =================
-    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET)
-    {
-      //等10ms再次检测，保证是开关的作用而不是磁场，静电什么的
-      HAL_Delay(10);
-      if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET) {
-
-        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_15);
-        while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET);
-      }
-    }
+  }
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 
