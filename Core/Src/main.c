@@ -87,7 +87,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  int state = 0;
+
 
   /* USER CODE END 2 */
 
@@ -95,38 +95,26 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (state <=2 || state==5)
+    // ================= 逻辑 1：PB12 控制 PB14 =================
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_12) == GPIO_PIN_SET)
     {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_SET);
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET); // 按下亮
     }
     else
     {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);   // 松开灭
     }
 
+    // ================= 逻辑 1：PB13 控制 PB15 =================
+    if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET)
+    {
+      //等10ms再次检测，保证是开关的作用而不是磁场，静电什么的
+      HAL_Delay(10);
+      if (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET) {
 
-    if (state >=1 && state<=3)
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_SET);
-    }
-    else
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, GPIO_PIN_RESET);
-    }
-
-    if (state >=2 && state<=5)
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-    }
-    else
-    {
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-    }
-
-    HAL_Delay(300);
-    state++;
-    if (state >5) {
-      state=0;
+        HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_15);
+        while (HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_13) == GPIO_PIN_RESET);
+      }
     }
     /* USER CODE END WHILE */
 

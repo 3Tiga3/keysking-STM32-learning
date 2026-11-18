@@ -27,13 +27,21 @@
 - **要点**：用状态机把"哪几盏亮"映射到 6 个状态，比逐个延时更清晰；`HAL_Delay` 仍是阻塞式
 - **Tag**：`hw02-flowing-led`
 
+### 第 3 份 · 按键控制小灯
+
+- **目标**：两组独立控制——PB12 按住时 PB14 亮、松开灭；PB13 每按一次 PB15 亮灭翻转（按一下亮、再按一下灭）
+- **实现方式**：`HAL_GPIO_ReadPin` 读按键电平 + `HAL_GPIO_WritePin` / `HAL_GPIO_TogglePin` 控灯；翻转按键加 10ms 延时消抖与松手检测
+- **涉及文件**：`Core/Src/main.c`、`Core/Src/gpio.c`、`keysking-STM32-learning.ioc`
+- **要点**：PB12/PB13 配为上拉输入（松开为高电平、按下接地为低电平）；PB14/PB15 为高电平点亮；消抖用 10ms 延时二次确认，松手检测用空 `while` 防止一次按压触发多次翻转
+- **Tag**：`hw03-key-led`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
 | --- | --- | --- | --- |
 | 1 | GPIO 输出 · 板载 LED 闪烁 | `Core/Src/main.c` | 已完成 |
 | 2 | GPIO 输出 · 流水灯 | `Core/Src/main.c` | 已完成 |
-| 3 | GPIO 输入 · 按键 | — | 待学 |
+| 3 | GPIO 输入 · 按键控灯 | `Core/Src/main.c`、`gpio.c` | 已完成 |
 | 4 | 外部中断 EXTI | — | 待学 |
 | 5 | 定时器 / PWM | — | 待学 |
 | 6 | USART 串口 | — | 待学 |
