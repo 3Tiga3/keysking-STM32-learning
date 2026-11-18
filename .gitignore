@@ -1,0 +1,31 @@
+# ===== CLion / CMake 构建产物（可重新生成）=====
+cmake-build-*/
+CMakeLists.txt.user
+
+# ===== CLion 本地配置（含本机绝对路径）=====
+.idea/
+
+# ===== 编译产物 =====
+*.o
+*.d
+*.obj
+*.axf
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+*.out
+*.su
+*.idb
+*.pdb
+
+# ===== 手动备份（历史交给 git）=====
+*.bak
+*.backup
+Backup/
+
+# ===== 系统文件 =====
+Thumbs.db
+.DS_Store
+desktop.ini
