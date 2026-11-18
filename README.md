@@ -17,19 +17,29 @@
 - **实现方式**：`HAL_GPIO_WritePin` 翻转电平 + `HAL_Delay` 阻塞延时
 - **涉及文件**：`Core/Src/main.c`、`Core/Src/gpio.c`、`Core/Inc/gpio.h`
 - **要点**：PC13 低电平点亮、高电平熄灭；`HAL_Delay` 属阻塞式，期间 CPU 空转，不能处理其他任务
+- **Tag**：`hw01-blink`
+
+### 第 2 份 · 电灯宗师（流水灯）
+
+- **目标**：PB12、PB13、PB14 三盏灯轮流点亮，形成流水效果
+- **实现方式**：`state` 状态机（0~5 循环），每 300ms 切换一次，`HAL_GPIO_WritePin` 逐位置位/复位
+- **涉及文件**：`Core/Src/main.c`
+- **要点**：用状态机把"哪几盏亮"映射到 6 个状态，比逐个延时更清晰；`HAL_Delay` 仍是阻塞式
+- **Tag**：`hw02-flowing-led`
 
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
 | --- | --- | --- | --- |
-| 1 | GPIO 输出 · 板载 LED 闪烁 | `Core/Src/main.c` | 进行中 |
-| 2 | GPIO 输入 · 按键 | — | 待学 |
-| 3 | 外部中断 EXTI | — | 待学 |
-| 4 | 定时器 / PWM | — | 待学 |
-| 5 | USART 串口 | — | 待学 |
-| 6 | DMA | — | 待学 |
-| 7 | ADC | — | 待学 |
-| 8 | I2C / SPI | — | 待学 |
+| 1 | GPIO 输出 · 板载 LED 闪烁 | `Core/Src/main.c` | 已完成 |
+| 2 | GPIO 输出 · 流水灯 | `Core/Src/main.c` | 已完成 |
+| 3 | GPIO 输入 · 按键 | — | 待学 |
+| 4 | 外部中断 EXTI | — | 待学 |
+| 5 | 定时器 / PWM | — | 待学 |
+| 6 | USART 串口 | — | 待学 |
+| 7 | DMA | — | 待学 |
+| 8 | ADC | — | 待学 |
+| 9 | I2C / SPI | — | 待学 |
 
 ## 日常更新工作流
 
