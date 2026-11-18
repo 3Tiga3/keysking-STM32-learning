@@ -43,6 +43,18 @@
 - **要点**：SysTick 在后台自动计时，主循环不空转——CPU 空闲时可响应其他任务，是裸机多任务调度的核心思想；对比写法用减法而非相等判断，天然规避 tick 溢出问题；这一版 PB12/13/14 恢复为推挽输出
 - **Tag**：`hw04-nonblock-flowing-led`
 
+### 第 5 份 · 认识中断（EXTI 外部中断）
+
+- **目标**：PB12 检测到下降沿触发外部中断，在中断里软件消抖后翻转 PB15 灯；主循环仍跑 PB14 的 2s 闪烁，两者并行
+- **实现方式**：PB12 配 `GPIO_MODE_IT_FALLING`（下降沿触发），使能 `EXTI15_10_IRQn`；中断服务函数 `EXTI15_10_IRQHandler` 里先 `HAL_Delay(10)` 消抖，二次读引脚确认为低电平后才 `HAL_GPIO_TogglePin(PB15)`
+- **涉及文件**：`Core/Src/gpio.c`、`Core/Src/stm32f1xx_it.c`、`Core/Src/main.c`、`keysking-STM32-learning.ioc`
+- **要点**：
+  - 中断是硬件自动跳转，CPU 不必轮询引脚——按下才响应，平时主循环全速跑自己的任务
+  - 软件消抖：进中断后延时 10ms 再读一次，确认按键确实按下（低电平）才动作，滤掉机械抖动造成的误触发
+  - **SysTick 优先级高于 EXTI15_10**：中断里调用 `HAL_Delay` 依赖 SysTick 继续计时，正因为 SysTick 优先级更高（能抢占本中断），中断里的 10ms 延时才能正常走完——这是能在 ISR 里用延时的前提
+  - NVIC 里给 EXTI15_10 设了抢占优先级 15（最低），不影响系统节拍
+- **Tag**：`hw05-exti`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
@@ -51,7 +63,7 @@
 | 2 | GPIO 输出 · 流水灯 | `Core/Src/main.c` | 已完成 |
 | 3 | GPIO 输入 · 按键控灯 | `Core/Src/main.c`、`gpio.c` | 已完成 |
 | 4 | 非阻塞延时 · SysTick 流水灯 | `Core/Src/main.c` | 已完成 |
-| 5 | 外部中断 EXTI | — | 待学 |
+| 5 | 外部中断 EXTI · 下降沿触发 | `Core/Src/stm32f1xx_it.c`、`gpio.c` | 已完成 |
 | 6 | 定时器 / PWM | — | 待学 |
 | 7 | USART 串口 | — | 待学 |
 | 8 | DMA | — | 待学 |

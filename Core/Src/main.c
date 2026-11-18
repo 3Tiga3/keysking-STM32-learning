@@ -87,22 +87,17 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  static const uint32_t interval = 500;   // 流水间隔 ms
-  uint32_t last_tick = 0;
-  uint8_t  led_index = 0;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    if (HAL_GetTick() - last_tick >= interval) {
-      last_tick = HAL_GetTick();          // 用系统滴答计时，不占用 CPU
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12, led_index == 0 ? GPIO_PIN_RESET : GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13, led_index == 1 ? GPIO_PIN_RESET : GPIO_PIN_SET);
-      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, led_index == 2 ? GPIO_PIN_RESET : GPIO_PIN_SET);
-      led_index = (led_index + 1) % 3;    // 状态轮转
-    }
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
+    HAL_Delay(2000);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
+    HAL_Delay(2000);
 
   }
     /* USER CODE END WHILE */
