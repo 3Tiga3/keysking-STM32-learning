@@ -80,6 +80,20 @@
   - 对比第 6 份轮询：CPU 不再卡在接收上，可以全程处理其他任务
 - **Tag**：`hw07-usart-it`
 
+### 第 8 份 · DMA 串口收发（USART DMA）
+
+- **目标**：在第 7 份基础上把串口收发改成 DMA 方式——收发由 DMA 控制器在后台搬运，只有收满指定的 2 字节才进一次传输完成中断处理控灯，主循环仍然空转
+- **实现方式**：CubeMX 给 USART2 开启 RX/TX 的 DMA 请求（RX→`DMA1_Channel6`，方向外设到内存、内存地址自增；TX→`DMA1_Channel7`，方向内存到外设），NVIC 里使能 `DMA1_Channel6/7_IRQn`；收发函数换成 `HAL_UART_Receive_DMA` / `HAL_UART_Transmit_DMA`，处理逻辑仍在 `HAL_UART_RxCpltCallback`
+- **指令格式**：与前两份相同——第 1 字节选灯（`1`→PB14、`2`→PB15、`3`→PA8），第 2 字节为 `0` 则点亮，收后回显
+- **涉及文件**：`Core/Src/main.c`、`Core/Src/usart.c`、`Core/Src/dma.c`、`Core/Inc/dma.h`、`Core/Src/stm32f1xx_it.c`、`Core/Inc/stm32f1xx_it.h`、`keysking-STM32-learning.ioc`
+- **要点**：
+  - **中断模式 vs DMA 模式的本质区别**：中断模式靠"发送数据寄存器空 / 接收数据寄存器非空"中断，**每收/发 1 个字节就中断一次**；DMA 模式靠"DMA 传输完成中断"，**只有整包数据（这里 2 字节）收/发完成才中断一次**——字节搬运交给 DMA 硬件，CPU 被打断的次数从"每字节"降到"每包"
+  - `HAL_UART_Receive_DMA` 同样只启动一次就返回；收满 2 字节后进 `DMA1_Channel6_IRQHandler` → `HAL_DMA_IRQHandler` → `HAL_UART_RxCpltCallback`，回调里控灯 + 回显 + 再次调用 `HAL_UART_Receive_DMA` 重启下一次接收，形成循环
+  - 首次接收放在 `while(1)` 之前只启动一次，不能放循环里反复启动
+  - DMA 配置为 `DMA_NORMAL`（普通模式）：传完一次即停止，需要软件重新发起；另有 `DMA_CIRCULAR`（循环模式）适合连续数据流
+  - 对比第 7 份中断模式：两者主循环都空转，但 DMA 把逐字节的搬运工作也从 CPU 手里接走了，收发大块数据时优势明显
+- **Tag**：`hw08-usart-dma`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
@@ -91,6 +105,7 @@
 | 5 | 外部中断 EXTI · 下降沿触发 | `Core/Src/stm32f1xx_it.c`、`gpio.c` | 已完成 |
 | 6 | USART 串口 · 轮询收发控灯 | `Core/Src/usart.c`、`main.c` | 已完成 |
 | 7 | USART 串口 · 中断收发控灯 | `Core/Src/main.c`、`usart.c` | 已完成 |
+| 8 | USART 串口 · DMA 收发控灯 | `Core/Src/main.c`、`usart.c`、`dma.c` | 已完成 |
 
 ## 日常更新工作流
 

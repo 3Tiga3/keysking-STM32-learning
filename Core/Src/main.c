@@ -18,9 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "usart.h"
 #include "gpio.h"
-#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -88,13 +88,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /*由于是中断，不会堵塞程序的执行，也就是还没等到接收到数据，就会接着向下执行，
   当执行到下次循环,可能上次的数据还没接收完就又执行开启串口中断接收，所以放在while钱前执行一次
   */
-  HAL_UART_Receive_IT(&huart2, receiveData, 2);//先发起一次接收
+  HAL_UART_Receive_DMA(&huart2, receiveData, 2);//先发起一次接收
 
   /* USER CODE END 2 */
 
@@ -154,7 +155,7 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-  HAL_UART_Transmit_IT(&huart2, 	receiveData,2);
+  HAL_UART_Transmit_DMA(&huart2, 	receiveData,2);
   GPIO_PinState state = GPIO_PIN_SET;
   if (receiveData[1] == '0'){
     state = GPIO_PIN_RESET;
@@ -168,7 +169,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
   else if (receiveData[0] == '3'){
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, state);
   }
-  HAL_UART_Receive_IT(&huart2, receiveData, 2);//每次接收完数据发起下一次接收
+  HAL_UART_Receive_DMA(&huart2, receiveData, 2);//每次接收完数据发起下一次接收
 
 }
 
