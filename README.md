@@ -67,6 +67,19 @@
   - TX 引脚配复用推挽（AF_PP）、RX 配输入，由 CubeMX 自动生成
 - **Tag**：`hw06-usart-polling`
 
+### 第 7 份 · 串口中断（USART IT）
+
+- **目标**：在第 6 份基础上把串口收发改成中断方式——收到设备发来的 2 字节指令后自动进中断回调处理控灯，主循环彻底空转，不再阻塞等待
+- **实现方式**：CubeMX 里勾开 USART2 全局中断（`USART2_IRQn`，NVIC 优先级 0）；发送/接收函数换成带 `_IT` 后缀的 `HAL_UART_Transmit_IT` / `HAL_UART_Receive_IT`，不需要超时参数；处理逻辑全部移入 `HAL_UART_RxCpltCallback` 回调函数
+- **指令格式**：与第 6 份相同——第 1 字节选灯（`1`→PB14、`2`→PB15、`3`→PA8），第 2 字节为 `0` 则点亮，收后回显
+- **涉及文件**：`Core/Src/main.c`、`Core/Src/usart.c`、`Core/Src/stm32f1xx_it.c`、`Core/Inc/stm32f1xx_it.h`、`keysking-STM32-learning.ioc`
+- **要点**：
+  - `HAL_UART_Receive_IT` 只"启动"一次接收就立即返回，数据没到也不等；收满指定字节数后硬件自动进 `USART2_IRQHandler`，再由 HAL 转到 `HAL_UART_RxCpltCallback`
+  - **回调末尾必须再次调用 `HAL_UART_Receive_IT`** 开启下一次接收，否则只接收一次就停——这是中断接收的关键套路
+  - 首次接收在 `while(1)` 之前只启动一次即可，不能放在循环里反复启动（会打断未完成的接收）
+  - 对比第 6 份轮询：CPU 不再卡在接收上，可以全程处理其他任务
+- **Tag**：`hw07-usart-it`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
@@ -77,6 +90,7 @@
 | 4 | 非阻塞延时 · SysTick 流水灯 | `Core/Src/main.c` | 已完成 |
 | 5 | 外部中断 EXTI · 下降沿触发 | `Core/Src/stm32f1xx_it.c`、`gpio.c` | 已完成 |
 | 6 | USART 串口 · 轮询收发控灯 | `Core/Src/usart.c`、`main.c` | 已完成 |
+| 7 | USART 串口 · 中断收发控灯 | `Core/Src/main.c`、`usart.c` | 已完成 |
 
 ## 日常更新工作流
 
