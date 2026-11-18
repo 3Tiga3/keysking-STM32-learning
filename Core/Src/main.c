@@ -18,7 +18,9 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usart.h"
 #include "gpio.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -86,18 +88,39 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  char message[ ]= "Hello World!";//设一个存着 你好世界 的数组
+  uint8_t receiveData[2];
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
-    HAL_Delay(2000);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-    HAL_Delay(2000);
+    //每个1s给串口连接设备发送:Hello World!
+    HAL_UART_Transmit(&huart2,(uint8_t*)message,strlen(message),5000);
+    HAL_Delay(1000);
+    
+    //设备通过串口发送01控制指定灯泡的亮灭
+    HAL_UART_Receive(&huart2, receiveData, 2, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart2, 	receiveData,2, 		100);
+    //设置一个GPIO_PinState的变量，名字为state,初始设为高电平
+    GPIO_PinState state = GPIO_PIN_SET;
+    //发送的第一个是1，则改为低电平
+    if (receiveData[1] == '0'){
+      state = GPIO_PIN_RESET;
+    }
+    if (receiveData[0] == '1'){
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, state);
+    }
+    else if (receiveData[0] == '2'){
+      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, state);
+    }
+    else if (receiveData[0] == '3'){
+      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, state);
+    }
+
 
   }
     /* USER CODE END WHILE */

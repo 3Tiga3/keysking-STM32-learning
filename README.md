@@ -55,6 +55,18 @@
   - NVIC 里给 EXTI15_10 设了抢占优先级 15（最低），不影响系统节拍
 - **Tag**：`hw05-exti`
 
+### 第 6 份 · 串口轮询模式（USART）
+
+- **目标**：STM32 每秒向串口设备发送 `Hello World!`；设备回发 2 字节指令控制指定灯泡亮灭
+- **实现方式**：CubeMX 配置 USART2（PA2-TX / PA3-RX，115200-8-N-1，异步收发）；主循环用 `HAL_UART_Transmit` 发送字符串，`HAL_UART_Receive(..., HAL_MAX_DELAY)` **轮询阻塞**等待 2 字节指令，再把收到的内容原样回显
+- **指令格式**：第 1 字节选灯——`1`→PB14、`2`→PB15、`3`→PA8；第 2 字节为 `0` 则点亮（低电平），其它值熄灭
+- **涉及文件**：`Core/Src/main.c`、`Core/Src/usart.c`、`Core/Inc/usart.h`、`Core/Src/gpio.c`、`keysking-STM32-learning.ioc`
+- **要点**：
+  - 轮询模式靠 CPU 反复查询/阻塞等待，接收期间主循环卡在 `HAL_UART_Receive` 里——简单可靠，但 CPU 被占用，是后续学中断/DMA 接收的对照基础
+  - UART 参数三要素：波特率 115200、8 数据位、1 停止位、无校验，收发双方必须一致
+  - TX 引脚配复用推挽（AF_PP）、RX 配输入，由 CubeMX 自动生成
+- **Tag**：`hw06-usart-polling`
+
 ## 学习进度
 
 | 序号 | 主题 | 涉及文件 | 状态 |
@@ -64,11 +76,7 @@
 | 3 | GPIO 输入 · 按键控灯 | `Core/Src/main.c`、`gpio.c` | 已完成 |
 | 4 | 非阻塞延时 · SysTick 流水灯 | `Core/Src/main.c` | 已完成 |
 | 5 | 外部中断 EXTI · 下降沿触发 | `Core/Src/stm32f1xx_it.c`、`gpio.c` | 已完成 |
-| 6 | 定时器 / PWM | — | 待学 |
-| 7 | USART 串口 | — | 待学 |
-| 8 | DMA | — | 待学 |
-| 9 | ADC | — | 待学 |
-| 10 | I2C / SPI | — | 待学 |
+| 6 | USART 串口 · 轮询收发控灯 | `Core/Src/usart.c`、`main.c` | 已完成 |
 
 ## 日常更新工作流
 
